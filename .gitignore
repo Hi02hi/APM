@@ -1,3 +1,4 @@
+# Nim template .gitignore
 nimcache/
 nimblecache/
 htmldocs/
