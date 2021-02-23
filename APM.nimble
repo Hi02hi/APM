@@ -1,7 +1,7 @@
 # Package
 
 version       = "0.2.0"
-author        = "Anonymous"
+author        = "Hi02Hi"
 description   = "Arbitrary Precision Math"
 license       = "MIT"
 srcDir        = "src"
