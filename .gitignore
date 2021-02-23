@@ -1,4 +1,10 @@
-# Nim template .gitignore
 nimcache/
 nimblecache/
 htmldocs/
+
+.gitignore
+.replit
+tests/tAdd
+tests/tSub
+tests/bench
+Apm

@@ -1,12 +1,12 @@
 import Apm
 
+# test all combinations of 2 numbers from -1000..1000
 const lim = 1_000
 
 echo "Subtraction Test"
-for step in 0..lim:
-  echo step
-  for i in step..lim:
-    let sum = initNumber($i) - initNumber($(i-step))
+for j in -lim..lim:
+  echo "batch ", j
+  for i in -lim..lim:
+    let sum = initNumber($i) - initNumber($j)
     
-    #echo i, " ", i-step, " ", sum
-    assert $sum == $(i-(i-step)), $sum & " != " & $i & " - " & $(i-step)
+    assert $sum == $(i-j), $sum & " != " & $i & " - " & $j
