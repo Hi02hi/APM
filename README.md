@@ -1,4 +1,4 @@
-# nimAPM
+# APM
 Arbitrary Precision Math, not made for speed, but to learn how to make big libraries
 
 under very heavy development
@@ -29,3 +29,8 @@ under very heavy development
   - [x] reduce
   - [ ] sqrt
   - [ ] rounding
+- [ ] fractions
+  - [ ] addition
+  - [ ] subtraction
+  - [ ] multiplication 
+  - [ ] division
