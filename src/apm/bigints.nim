@@ -3,7 +3,7 @@ type
     negative: bool
     limbs: seq[uint8]
 
-func reversed[T: seq[uint8] | string](arr: T): T = 
+func reversed[T: seq[uint8] | string](arr: T): T {.noInit.} = 
   result = 
     when T is string:
       newStringofCap(arr.len)
@@ -23,7 +23,7 @@ iterator traverse(x, y: seq[uint8]): (int, uint8, uint8) =
 func newNumber*(num: uint8): number = 
   number(limbs: @[num], negative: false)
 
-func normalize(num: var number) = 
+func normalize(num: var number) {.inline.} = 
   # cut off zeros off the front
   var start = 0
   for ix, i in num.limbs:
@@ -40,7 +40,7 @@ func newNumber*[T: SomeInteger](num: T): number =
 
   when T is SomeSignedInt: result.negative = num < 0
 
-  result.limbs = `@`(cast[array[sizeof(T), uint8]](num.safe)).reversed
+  result.limbs = `@`(cast[array[8, uint8]](num.safe)).reversed
   # BEWARE!: this doesnt work at compile time w. nim v1.2.0
   result.normalize
 
@@ -70,7 +70,10 @@ func cmp*(x, y: number): int =
       if x.limbs.len != y.limbs.len: return cmp(x.limbs.len, y.limbs.len)
       else:
         for _, a, b in traverse(x.limbs, y.limbs):
-          if a != b: return cmp(a, b)
+          let test = cmp(a, b)
+          if test != 0:
+            # a != b
+            return test
 
 func `==`*(x, y: number): bool = cmp(x, y) == 0
 func `>` *(x, y: number): bool = cmp(x, y) > 0
@@ -86,9 +89,10 @@ func add*(x, y: number): number =
   for ix, a, b in traverse(x.limbs.reversed, y.limbs.reversed):
     #if ix > y.limbs.len and not carry:return
     let total = a.int16 + b.int16 + carry.int16
-    #debugEcho ix, " ", i, " ", total
+    #debugEcho ix, " ", (a, b), " ", total
     carry = total >= 256'i16
-    result.limbs[^(ix+1)] = (if carry: total-256'i16 else: total).uint8
+    result.limbs[^(ix+1)] = cast[uint8](total)
+    # (if carry: total-256'i16 else: total).uint8
   if carry: # we still need to carry a one
     result.limbs = @[1'u8] & result.limbs
 
@@ -167,8 +171,11 @@ func `*`*(x, y: number): number =
   # digit by digit multiplication
   result = zero
 
-  for ix, i in y.limbs:
-    result += mul(x, i)
+  for ix, i in y.limbs.reversed:
+    var digit = mul(x, i)
+    #debugEcho x, i, digit
+    digit.limbs.setLen(digit.limbs.len + ix)
+    result += digit
 
 func `*=`*(x: var number, y: number) = x = x * y
 
@@ -233,19 +240,20 @@ const chars = [
   '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
   'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i' ,'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
   'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I' ,'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+
 func toString*(x: number, base: range[1..62] = 10): string = 
   ## number -> string, bases 1..62
   if x == zero: return "0"
-  if x.negative: return "-" & $abs(x)
+  if x.negative: return "-" & x.abs.toString
   var left = x
   while left > zero:
-    let (d, m) = divMod(left, newNumber(base.uint8))
+    let (d, m) = divMod(left, newNumber(base))
+    #debugEcho (d, m), left
     result.add chars[m.limbs[0]]
     left = d
-  if x.negative: result.add "-"
   result.reversed
 
-func `$`(x: number): string = x.toString(10)
+func `$`*(x: number): string = x.toString
 
 func newNumber*(num: string, base: range[1..62] = 10): number = 
   ## string, bases 1..62 -> number
@@ -277,5 +285,4 @@ when isMainModule:
       if prime test: yield test
       inc test
 
-  for i in primes(1000.newNumber):
-    echo i
+  echo newNumber(10)
