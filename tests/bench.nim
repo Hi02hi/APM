@@ -8,10 +8,14 @@ bench(Addition):
 
 when defined(full):
    #[
-  these are
-    ~4x faster than me adding
-    ~5-6x faster than me subtracting
-    ~6-9x faster than me multiplying
+  bigints is
+    ~2x faster than me adding
+    ~2x faster than me subtracting
+    ~4x faster than me multiplying
+  , while GMP is
+    ~2.5x faster adding
+    ~3.3x faster subtracting
+    ~7x faster multiplying
   ]#
   import bigints, bignum
   benchRelative(Proper Addition):
